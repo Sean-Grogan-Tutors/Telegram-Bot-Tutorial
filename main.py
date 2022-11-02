@@ -1,23 +1,42 @@
 import csv
 import os
 import time
+import traceback
 
 from tqdm import trange
 
 from simulations import SIMULATION_02, SIMULATION_01
+from telegram_bot import telegram_bot_send_message
 
 
 def main(n_sims):
-    for i in trange(n_sims):
-        t_start_sim_1 = time.time()
-        SIMULATION_01(60, 180)  # Takes between 1 and 3 minutes to complete
-        t_end_sim_1 = time.time()
-        t_start_sim_2 = time.time()
-        SIMULATION_02(60, 180)  # Takes between 1 and 3 minutes to complete, beta dist
-        t_end_sim_2 = time.time()
-        log_data(i, t_end_sim_1 - t_start_sim_1,
-                 t_end_sim_2 - t_start_sim_2,
-                 file="./results/results.csv")
+    telegram_bot_send_message(f"Starting Simulations!")
+    try:
+        for i in trange(n_sims):
+            t_start_sim_1 = time.time()
+            # Takes between 1 and 3 minutes to complete
+            SIMULATION_01(60, 180)
+            t_end_sim_1 = time.time()
+
+            t_start_sim_2 = time.time()
+            # Takes between 1 and 3 minutes to complete, beta dist
+            SIMULATION_02(60, 180)
+            t_end_sim_2 = time.time()
+
+            log_data(i, t_end_sim_1 - t_start_sim_1,
+                     t_end_sim_2 - t_start_sim_2,
+                     file="./results/results.csv")
+
+            if i % 10 == 0:
+                telegram_bot_send_message(
+                    f"Completed iteration {i} of {n_sims}"
+                )
+    except:
+        traceback.print_exc()
+        telegram_bot_send_message(f"Error in Simulations!")
+        telegram_bot_send_message(f"TRACEBACK : {traceback.format_exc()}")
+    else:
+        telegram_bot_send_message(f"Completed Simulations!")
 
 
 def log_data(i, sim1_time, sim2_time, file):

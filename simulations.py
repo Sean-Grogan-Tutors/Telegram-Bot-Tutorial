@@ -8,6 +8,8 @@ def SIMULATION_01(lb, ub):
     """
     t = random.randint(lb, ub)
     time.sleep(t)
+    if random.randint(1, 10000) >= 500:
+        raise Exception("Artificial error raised")
     return 0
 
 
